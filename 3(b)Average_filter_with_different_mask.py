@@ -2,88 +2,102 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-from math import log10,sqrt
 
-def average_filter(img, image_size, m, n):
-    filtered_img = img.copy()
-    mid = m//2
-    a = 1/(m*n)
+def Average_Filter(noisy_img,mask_size):
+    m = mask_size
+    n = mask_size
+    max_size = m*n
+    a  = 1/max_size
     avg_mask = [[a]*n]*m
 
-    for i in range(0,image_size,1):
-        for j in range(image_size):
-            temp = 0
-            for x,c in zip(range(i-mid,i+mid+1,1), range(0,m,1)):
-                for y,d in zip(range(j-mid,j+mid+1,1), range(0,n,1)):
-                    if(0<=x<image_size and 0<=y<image_size):
-                        temp+=(img[x][y]*avg_mask[c][d])
-            filtered_img[i,j]=temp
-    
-    return filtered_img
+    img = noisy_img.copy()
+    height, width = img.shape
+    ms_h = len(avg_mask)
+    ms_w = len(avg_mask[0])
+    mid = ms_h // 2
 
-def PSNR(original_img, filtered_img):
-    mse = np.mean(np.square(np.subtract(original_img.astype(np.int16),filtered_img.astype(np.int16))))
-    if mse==0:
-        return np.Inf
+    for i in range(height):
+        for j in range(width):
+            temp=0
+            for m in range(ms_h):
+                for n in range(ms_w):
+                    x = i-mid+m
+                    y = j-mid+n
+                    if(0<=x<height and 0<=y<width):
+                        temp+=(noisy_img[x][y]*avg_mask[m][n])
+            img[i, j] = temp
     
-    max_pixel = 255.0
-    psnr = 20 * log10(max_pixel) - 10 * log10(mse)
-    psnr = round(psnr,2) 
+    return img
+
+
+
+
+def PSNR(org_img, filtered_img):
+    org_img, filtered_img = np.float64(org_img), np.float64(filtered_img)
+    mse = np.mean((org_img-filtered_img)**2)
+    if mse == 0:
+        return float('inf')
+    
+    psnr = 20*np.log10(255.0)-10*np.log10(mse)
+    psnr = round(psnr,2)
     return psnr
 
-image_path = './lenna.webp'
-gray_image = cv2.imread(image_path,0)
-image = cv2.resize(gray_image,(512,512))
-row,col = image.shape
-image_size = row
 
-noisy_img = image.copy()
-l = int(input("Enter the value of l : "))
-r = int(input("Enter the value of r : "))
-number_of_pixels = random.randint(l,r)
+img_path = './pattern.tif'
+gray_img = cv2.imread(img_path,0)
+img = cv2.resize(gray_img,(512,512))
+
+noisy_img = img.copy()
+
+row, col = img.shape
+l = int(input('l : '))
+r = int(input('r : '))
+num_of_pixels = random.randint(l, r)
+print(num_of_pixels)
 
 # adding salt
-for i in range(number_of_pixels):
-    x_crd = random.randint(0,col-1)
-    y_crd = random.randint(0,row-1)
-    noisy_img[x_crd, y_crd] = 255
+for i in range(num_of_pixels):
+    x = random.randint(0, col-1)
+    y = random.randint(0, row-1)
+    noisy_img[y, x] = 255
 
 # adding pepper
-for i in range(number_of_pixels):
-    x_crd = random.randint(0,col-1)
-    y_crd = random.randint(0,row-1)
-    noisy_img[x_crd, y_crd] = 0
+for i in range(num_of_pixels):
+    x = random.randint(0, col-1)
+    y = random.randint(0, row-1)
+    noisy_img[y, x] =  0
 
-mask_3 = average_filter(noisy_img, image_size, 3, 3)
-mask_5 = average_filter(noisy_img, image_size, 5, 5)
-mask_7 = average_filter(noisy_img, image_size, 7, 7)
+avg_img3 = Average_Filter(noisy_img, 3)
+avg_img5 = Average_Filter(noisy_img, 5)
+avg_img7 = Average_Filter(noisy_img, 7)
 
-psnr_noisy = PSNR(image,noisy_img)
-psnr_3 = PSNR(image,mask_3)
-psnr_5 = PSNR(image,mask_5)
-psnr_7 = PSNR(image,mask_7)
+noisy_psnr = PSNR(img, noisy_img)
+avg_psnr3 = PSNR(img, avg_img3)
+avg_psnr5 = PSNR(img, avg_img5)
+avg_psnr7 = PSNR(img, avg_img7)
+
 
 plt.figure(figsize=(7,7))
+plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.4, hspace=0.4)
 
 plt.subplot(2,3,1)
 plt.title('Original image')
-plt.imshow(image,cmap='gray')
+plt.imshow(img,cmap='gray')
 
 plt.subplot(2,3,2)
-plt.title(f'Noisy PSNR {psnr_noisy}')
+plt.title(f'Noisy image PSNR={noisy_psnr}')
 plt.imshow(noisy_img,cmap='gray')
 
 plt.subplot(2,3,3)
-plt.title(f'3x3 PSNR {psnr_3}')
-plt.imshow(mask_3,cmap='gray')
+plt.title(f'Average filtered 3X3 PSNR={avg_psnr3}')
+plt.imshow(avg_img3,cmap='gray')
 
 plt.subplot(2,3,4)
-plt.title(f'5x5 PSNR {psnr_5}')
-plt.imshow(mask_5,cmap='gray')
+plt.title(f'Average filtered 5X5 PSNR={avg_psnr5}')
+plt.imshow(avg_img5,cmap='gray')
 
 plt.subplot(2,3,5)
-plt.title(f'7x7 PSNR {psnr_7}')
-plt.imshow(mask_7,cmap='gray')
+plt.title(f'Average filtered 7X7 PSNR={avg_psnr7}')
+plt.imshow(avg_img7,cmap='gray')
 
 plt.show()
-cv2.destroyAllWindows()

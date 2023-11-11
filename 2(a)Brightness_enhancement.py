@@ -2,36 +2,32 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-image_path = './pikachu.png'
-gray_image = cv2.imread(image_path,0)
-image = cv2.resize(gray_image,(512,512))
+img_path = './lenna.webp'
+gray_img = cv2.imread(img_path,0)
+img = cv2.resize(gray_img,(512,512))
 
-enhanced_image = image.copy()
+height, width = img.shape
+enhanced_img = img.copy()
 
-min_graylevel = 10
-max_graylevel = 100
+min_graylevel = int(input('Min gray level: '))
+max_graylevel = int(input('Max gray level: '))
 
-height,width = image.shape
+for i in range(height):
+    for j in range(width):
+        pixel_val = img[i][j]
 
-for i in range(0,height,1):
-    for j in range(0,width,1):
-        pixel_value = enhanced_image[i][j]
-
-        if min_graylevel<=pixel_value<=max_graylevel:
-            enhanced_image[i][j] =min(255,pixel_value+50)
+        if min_graylevel<=pixel_val<=max_graylevel:
+            enhanced_img[i][j] = min(255,pixel_val+50)
 
 plt.figure(figsize=(7,7))
-plt.subplot(2,1,1)
+plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.4, hspace=0.4)
+
+plt.subplot(1,2,1)
 plt.title('Original image')
-plt.imshow(image,cmap='gray')
+plt.imshow(img,cmap='gray')
 
-plt.subplot(2,1,2)
+plt.subplot(1,2,2)
 plt.title('Enhanced image')
-plt.imshow(enhanced_image,cmap='gray')
+plt.imshow(enhanced_img,cmap='gray')
+
 plt.show()
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-
-

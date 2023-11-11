@@ -1,36 +1,21 @@
-import cv2
+import cv2 
 import matplotlib.pyplot as plt
+import numpy as np
 
-image_path = './pikachu.png'
+img_path = './Rose.tif'
+gray_img = cv2.imread(img_path,0)
+img = cv2.resize(gray_img,(512,512))
 
-# cv2.imread(filename, flag)
-# filename: The path to the image file.
-# flag: The flag specifies the way how the image should be read. (0=gray,1=rgb)
-image = cv2.imread(image_path,0)
-image2 = cv2.resize(image,(512,512))
+height, width = img.shape
+a = height
+i=1
 
-# cv2.imshow("Original Image",image2)
-window_name = "Image"
-window_size = (512,512)
-cv2.namedWindow(window_name,cv2.WINDOW_NORMAL)  #Setting window name
-# cv2.resizeWindow(window_name, width, height)
-cv2.resizeWindow(window_name,window_size)       #Fixing window size
+while a>=4:
+    img = cv2.resize(img,(a,a))
+    plt.subplot(2,4,i)
+    plt.title(f'{a} X {a}')
+    plt.imshow(img,cmap='gray')
+    a//=2
+    i+=1
 
-# Get the dimensions (width and height) of the image
-height, width= image2.shape
-a=height
-
-# print(f"Image Width: {width} pixels")
-# print(f"Image Height: {height} pixels")
-
-while a>0:
-    image2 = cv2.resize(image2,(a,a))   #Perforimg image resize operation
-    # cv2.imshow(window_name, image)
-    cv2.imshow(window_name,image2)  #Showing the image
-    cv2.waitKey(1000)   #Pause for 1 second
-    print(a)
-    a//=2   #Decrease spatial resolution by half
-    
-
-
-# cv2.destroyAllWindows()
+plt.show()

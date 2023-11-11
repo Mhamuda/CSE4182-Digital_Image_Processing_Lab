@@ -1,58 +1,51 @@
-import cv2
+import cv2 
 import matplotlib.pyplot as plt
+import numpy as np
 
-image_path = './pikachu.png'
-gray_image = cv2.imread(image_path,0)
-image = cv2.resize(gray_image,(512,512))
+img_path = './lenna.webp'
+gray_img = cv2.imread(img_path,0)
+img = cv2.resize(gray_img,(512,512))
 
-# window_name = "Image"
-# window_size = (512,512)
-# cv2.namedWindow(window_name,cv2.WINDOW_NORMAL)
-# cv2.resizeWindow(window_name,window_size)
+th_img = img.copy()
+threshold_val = int(input('Threshold value: '))
 
-thresholdImage = image.copy()
-height,width = image.shape
-histogram = [0]*256
-threshold = [0]*256
+img_his = [0]*256
+th_img_his = [0]*256
+height, width = img.shape
 
-threshold_value = int(input('Threshold value : '))
+for i in range(height):
+    for j in range(width):
+        pixel_val = img[i][j]
+        img_his[pixel_val]+=1
 
-for i in range(0,height):
-    for j in range(0,width):
-        histogram[image[i][j]]+=1
-
-        if image[i][j]>threshold_value:
-            threshold[255]+=1
-            thresholdImage[i][j]=255
+        if pixel_val>threshold_val:
+            th_img_his[255]+=1
+            th_img[i][j]=255
         else:
-            threshold[0]+=1
-            thresholdImage[i][j]=0
-
+            th_img_his[0]+=1
+            th_img[i][j]=0
 
 plt.figure(figsize=(5,5))
 plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.4, hspace=0.4)
+
 plt.subplot(2,2,1)
-plt.title('Original Image')
-plt.imshow(image,cmap='gray')
+plt.title('Original image')
+plt.imshow(img,cmap='gray')
 
 plt.subplot(2,2,2)
-plt.bar(range(256),histogram,width=1,color='blue')
-# plt.plot(histogram, marker='', linestyle='-', color='b', markersize=8)  # 'o' for markers, '-' for lines, 'b' for blue color
-plt.title('Histogram')
-plt.xlabel('Pixel Value')
+plt.bar(range(256),img_his,width=1,color='cyan')
+plt.title('Original image histogram')
+plt.xlabel('Pixel value')
 plt.ylabel('Frequency')
 
 plt.subplot(2,2,3)
-plt.title('Single Threshold Image')
-plt.imshow(thresholdImage,cmap='gray')
+plt.title('Thresholdl image')
+plt.imshow(th_img,cmap='gray')
 
 plt.subplot(2,2,4)
-plt.bar(range(256),threshold,width=1,color='red')
-plt.title('Single Threshold')
+plt.bar(range(256),th_img_his,width=1,color='red')
+plt.title('Threshold image histogram')
 plt.xlabel('Pixel value')
 plt.ylabel('Frequency')
 
 plt.show()
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
